@@ -1,6 +1,9 @@
 // Sudoku solver program
 // @Gabriel Dumitrescu 2023
 
+use std::collections::HashSet;
+
+
 //The puzzle is a square of size:
 static PUZZLE_SIZE: usize = 9;
 
@@ -30,24 +33,41 @@ impl SudokuPuzzle {
             pz.puzzle.push(value);
             pz.solved_puzzle.push(value);
         }
-
+        pz.solved_puzzle=pz.puzzle.to_owned();
         pz
     }
     fn print(&self){
-        for (i, &val) in self.puzzle.iter().enumerate() {
-            if (i!=0) && (i % PUZZLE_SIZE == 0) {
-                println!();
-            }
-            if val == 0  {
-                print!("_ ")
-            }
-            else {
-                print!("{} ",val);
-            }
-        }
-        println!();
+        print_vec_puzzle(&self.puzzle);
+    }
+
+    fn print_solution(&self){
+        print_vec_puzzle(&self.solved_puzzle);
+    }
+
+    fn solve(&self) -> bool {
+
+        false
     }
 }
+
+fn print_vec_puzzle(puzzle:&Vec<u8>){
+    println!("__________________");
+    for (i, &val) in puzzle.iter().enumerate() {
+        if (i!=0) && (i % PUZZLE_SIZE == 0) {
+            println!("|");
+        }
+        if val == 0  {
+            print!("_ ")
+        }
+        else {
+            print!("{} ",val);
+        }
+    }
+    println!("|");
+    println!("------------------");
+
+}
+
 
 fn main() {
 
@@ -55,7 +75,8 @@ fn main() {
     let pz=SudokuPuzzle::from_string(&str_puzzle);
 
     pz.print();
-   println!("Puzzle is solved: {}", pz.is_solved);
+    pz.print_solution();
+    println!("Puzzle is solved: {}", pz.is_solved);
 
 }
 
