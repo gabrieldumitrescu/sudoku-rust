@@ -81,7 +81,6 @@ impl SudokuSolver{
         let (r,c)=SudokuSolver::get_row_col(idx);
         let r_start=r*PUZZLE_SIZE;
         let mut i=0;
-        println!("idx {} start row analyzing", idx);
         while i<PUZZLE_SIZE{
             let c_idx=r_start+i;
             if c_idx != idx {
@@ -90,7 +89,6 @@ impl SudokuSolver{
             i=i+1;
         }
         i=0;
-        println!("idx {} start column analyzing", idx);
         while i<PUZZLE_SIZE{
             let c_idx=i*PUZZLE_SIZE+c;
             if c_idx != idx {
@@ -100,7 +98,6 @@ impl SudokuSolver{
         }
         let start_idx=SudokuSolver::get_region_start_idx(r,c);
         i=0;
-        println!("idx {} start region analyzing", idx);
         while i<REGION_SIZE {
             let mut j=0;
             while j<REGION_SIZE{
@@ -112,8 +109,6 @@ impl SudokuSolver{
             }
             i=i+1;
         }
-
-        println!("idx {} end analyzing", idx);
         poss
     }
 
@@ -144,9 +139,7 @@ impl SudokuSolver{
         loop{
             cr=0;
             while cr<PUZZLE_SIZE*PUZZLE_SIZE {
-                println!("At index : {}", cr);
                 let cr_set=&self.pos_values[cr];
-                println!("{} possible values",cr_set.len());
                 if cr_set.len() != 1 { 
                     let cr_pos=self.get_pos_values(cr);
                     //let (r,c)=SudokuSolver::get_row_col(cr);
