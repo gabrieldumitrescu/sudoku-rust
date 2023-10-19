@@ -10,6 +10,7 @@ use std::collections::HashSet;
 //The puzzle is a square of size:
 static PUZZLE_SIZE: usize = 9;
 static REGION_SIZE: usize = 3;
+static NUM_CELLS:usize = PUZZLE_SIZE*PUZZLE_SIZE;
 
 
 //Object to hold the puzzle
@@ -147,7 +148,7 @@ impl SudokuSolver{
 
 
     fn apply_basic_rules(&mut self) -> u8 {
-        for i in 0..PUZZLE_SIZE*PUZZLE_SIZE {
+        for i in 0..NUM_CELLS {
             let cr_set=&self.pos_values[i];
             if cr_set.len() != 1 { 
                 let cr_pos=self.get_pos_values(i);
@@ -164,8 +165,8 @@ impl SudokuSolver{
     }
 
     fn apply_advanced_rule(&mut self) -> u8{
-        for i in 0..PUZZLE_SIZE*PUZZLE_SIZE{
-            let cr_set=&self.pos_values[i];
+        for i in 0..NUM_CELLS{
+            let _cr_set=&self.pos_values[i];
 
 
         }
