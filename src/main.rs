@@ -80,6 +80,7 @@ impl SudokuSolver{
         let mut poss:HashSet<u8>=HashSet::from([1,2,3,4,5,6,7,8,9]);
         let (r,c)=SudokuSolver::get_row_col(idx);
         let r_start=r*PUZZLE_SIZE;
+        //verify row
         let mut i=0;
         while i<PUZZLE_SIZE{
             let c_idx=r_start+i;
@@ -88,6 +89,7 @@ impl SudokuSolver{
             }
             i=i+1;
         }
+        //verify column
         i=0;
         while i<PUZZLE_SIZE{
             let c_idx=i*PUZZLE_SIZE+c;
@@ -97,6 +99,7 @@ impl SudokuSolver{
             i=i+1;
         }
         let start_idx=SudokuSolver::get_region_start_idx(r,c);
+        //verify region
         i=0;
         while i<REGION_SIZE {
             let mut j=0;
@@ -127,36 +130,64 @@ impl SudokuSolver{
         placed
     }
 
+    fn test_solved(&mut self)->bool{
+        if self.is_solved {
+            return true;
+        }
+        let mut result: bool=true;
+        for c in &self.solved_puzzle{
+            if *c==0{
+                result = false;
+                break;
+            }
+        }
+        self.is_solved = result;
+        result
+    }
+
+
+    fn apply_basic_rules(&mut self) -> u8 {
+        for i in 0..PUZZLE_SIZE*PUZZLE_SIZE {
+            let cr_set=&self.pos_values[i];
+            if cr_set.len() != 1 { 
+                let cr_pos=self.get_pos_values(i);
+                //let (r,c)=SudokuSolver::get_row_col(cr);
+                //print!("Posible values at {},{}:",r,c);
+                //for value in &cr_pos{
+                //    print!("{},",value);
+                //}
+                //println!("");
+                self.pos_values[i]=cr_pos;
+            }
+        }
+        self.place_single_values()
+    }
+
+    fn apply_advanced_rule(&mut self) -> u8{
+        for i in 0..PUZZLE_SIZE*PUZZLE_SIZE{
+            let cr_set=&self.pos_values[i];
+
+
+        }
+        0
+    }
+
     fn solve(&mut self) -> bool {
-        //let mut pos_values:Vec<HashSet<u8>> = Vec::new();
-        let mut cr:usize=0;
         if self.pos_values.len()==0 {
-            while cr<PUZZLE_SIZE*PUZZLE_SIZE {
+            for _ in  0..PUZZLE_SIZE*PUZZLE_SIZE {
                 self.pos_values.push(HashSet::new());
-                cr=cr+1;
             }
         }
         loop{
-            cr=0;
-            while cr<PUZZLE_SIZE*PUZZLE_SIZE {
-                let cr_set=&self.pos_values[cr];
-                if cr_set.len() != 1 { 
-                    let cr_pos=self.get_pos_values(cr);
-                    //let (r,c)=SudokuSolver::get_row_col(cr);
-                    //print!("Posible values at {},{}:",r,c);
-                    //for value in &cr_pos{
-                    //    print!("{},",value);
-                    //}
-                    //println!("");
-                    self.pos_values[cr]=cr_pos;
-                }
-                cr=cr+1;
-            }
-            let num_placed=self.place_single_values();
+            if self.test_solved(){ break;}
+            let mut num_placed=self.apply_basic_rules();
             println!("Placed {} values", num_placed);
-            if num_placed == 0 { break;}
+            if num_placed == 0 { 
+                num_placed=self.apply_advanced_rule();
+                if num_placed==0 {break;}
+            }
         }
-        false
+        self.is_solved
     }
 }
 
@@ -181,7 +212,7 @@ fn print_vec_puzzle(puzzle:&Vec<u8>){
 
 fn main() {
 
-    let str_puzzle = String::from("001700509573024106800501002700295018009400305652800007465080071000159004908007053");
+    let str_puzzle = String::from("096040001100060004504810390007950043030080000405023018010630059059070830003590007");
     let pz=SudokuPuzzle::from_string(&str_puzzle);
     let mut sol=SudokuSolver::new(&pz);
     sol.print_solution();
