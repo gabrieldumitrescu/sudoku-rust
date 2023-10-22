@@ -74,10 +74,6 @@ impl SudokuSolver{
     }
 
     fn get_pos_values(&self,idx: usize)-> HashSet<u8>{
-        let cell_value=self.solved_puzzle[idx];
-        if cell_value != 0 {
-            return HashSet::from([cell_value]);
-        }
         let mut poss:HashSet<u8>=HashSet::from([1,2,3,4,5,6,7,8,9]);
         let (r,c)=SudokuSolver::get_row_col(idx);
         let r_start=r*PUZZLE_SIZE;
@@ -126,7 +122,7 @@ impl SudokuSolver{
                     }
                     placed+=1;
                 }
-            }
+            } 
         }
         placed
     }
@@ -165,26 +161,48 @@ impl SudokuSolver{
     }
 
     fn apply_advanced_rule(&mut self) -> u8{
+        let mut placed: u8 = 0;
         for i in 0..NUM_CELLS{
-            let _cr_set=&self.pos_values[i];
+            if self.solved_puzzle[i] > 0 { continue; }
+            let mut cr_set=self.pos_values[i].clone();
+            let (r,c) = SudokuSolver::get_row_col(i);
+            for j in 0..PUZZLE_SIZE {
+                if j==c { continue; }
+                let ri=r*PUZZLE_SIZE + j;
+                cr_set = cr_set.difference(&self.pos_values[ri]).copied().collect();
+            }
+            if cr_set.len() == 1 {
+                for v in &cr_set { 
+                    self.solved_puzzle[i]=*v;
+                }
+                placed+=1;
+            }
+
 
 
         }
-        0
+        placed
     }
 
     fn solve(&mut self) -> bool {
         if self.pos_values.len()==0 {
-            for _ in  0..PUZZLE_SIZE*PUZZLE_SIZE {
-                self.pos_values.push(HashSet::new());
+            for i in  0..NUM_CELLS {
+                let mut cr_set=HashSet::new();
+                if self.solved_puzzle[i]>0 {
+                    cr_set.insert(self.solved_puzzle[i]);
+                }
+                self.pos_values.push(cr_set);
             }
         }
         loop{
             if self.test_solved(){ break;}
             let mut num_placed=self.apply_basic_rules();
             println!("Placed {} values", num_placed);
-            if num_placed == 0 { 
+            if num_placed == 0 {
+                self.print_solution();
+                println!("Trying advanced rule");
                 num_placed=self.apply_advanced_rule();
+                println!("Placed {} values", num_placed);
                 if num_placed==0 {break;}
             }
         }
@@ -207,19 +225,41 @@ fn print_vec_puzzle(puzzle:&Vec<u8>){
     }
     println!("|");
     println!("------------------");
+}
 
+use std::fs::read_to_string;
+
+fn read_lines(filename: &str) -> Vec<String> {
+    read_to_string(filename) 
+        .unwrap()  // panic on possible file-reading errors
+        .lines()  // split the string into an iterator of string slices
+        .map(String::from)  // make each slice into a string
+        .collect()  // gather them together into a vector
 }
 
 
 fn main() {
+    let puzzles=read_lines("./puzzles1.txt");
+     let pz=SudokuPuzzle::from_string(&puzzles[2727]);
+     let mut sol=SudokuSolver::new(&pz);
+     sol.print_solution();
+     sol.solve();
+     sol.print_solution()
 
-    let str_puzzle = String::from("096040001100060004504810390007950043030080000405023018010630059059070830003590007");
-    let pz=SudokuPuzzle::from_string(&str_puzzle);
-    let mut sol=SudokuSolver::new(&pz);
-    sol.print_solution();
-    sol.solve();
-
-    sol.print_solution();
+//    let mut solved: usize=0;
+//    for (i,p) in puzzles.iter().enumerate(){
+//        let pz=SudokuPuzzle::from_string(p);
+//        let mut sol=SudokuSolver::new(&pz);
+//        //sol.print_solution();
+//        sol.solve();
+//        if sol.is_solved {
+//            println!("Solved puzzle no {}.",i);
+//            solved+=1;
+//        }
+//    }
+//
+//    println!("Solved {} from {} puzzles.", solved, puzzles.len());
+        //sol.print_solution();
     //h=h.difference(&h1).copied().collect();
     //for v in &h{
     //    println!("{}",v);
